@@ -1,0 +1,164 @@
+<!-- Auth Container with toggle functionality -->
+<div id="auth-container">
+    <div class="auth-card">
+        <h1><i class="fas fa-book-reader"></i> BookNerds</h1>
+        <p class="slogan">Your book review community</p>
+        <div id="login-section">
+            <h2>Log in</h2>
+            <button id="login-btn" class="login-button">Proceed to Login</button>
+            <p class="toggle-auth">Don't have an account? <a href="#" id="show-register">Register here</a></p>
+        </div>
+        <div id="register-section" style="display: none;">
+            <h2>Create an account</h2>
+            <form id="registerForm">
+                <input type="text" id="registerUsername" placeholder="Username" required>
+                <input type="password" id="registerPassword" placeholder="Password" required>
+                <button type="submit">Register</button>
+            </form>
+            <p class="toggle-auth">Already have an account? <a href="#" id="show-login">Log in here</a></p>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content (hidden initially) -->
+<div id="main-content" style="display: none;">
+    <header>
+        <div class="logo">
+            <i class="fas fa-book-reader"></i> 
+            <h1>BookNerds</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#/home" id="nav-home" class="active">Home</a></li>
+                <li><a href="#/my-reviews" id="nav-my-reviews">My Reviews</a></li>
+                <li><a href="#/search" id="nav-search">Search</a></li>
+                <li><a href="#/admin" id="nav-admin">Admin</a></li>
+                <li><a href="#/logout" id="logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Home Page -->
+    <div id="home-page">
+        <div id="latest-reviews-section">
+            <h2>Latest Reviews</h2>
+            <div id="latest-reviews">
+                <p id="no-reviews-message">No reviews yet. Search for a book to add the first review!</p>
+                <ul id="reviewsList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Reviews Page -->
+    <div id="my-reviews-page" style="display: none;">
+        <h2>My Reviews</h2>
+        <div id="my-reviews-list">
+            <p id="no-my-reviews-message">You haven't written any reviews yet.</p>
+            <!-- User's reviews will appear here -->
+        </div>
+    </div>
+
+    <!-- Book Detail Page -->
+    <div id="book-detail" style="display: none;">
+        <div class="book-detail-container">
+            <div id="book-info">
+                <!-- Book details will appear here -->
+            </div>
+            <div id="book-reviews">
+                <h3>Reviews</h3>
+                <ul id="book-reviews-list"></ul>
+            </div>
+            <div id="add-review">
+                <h3>Add Your Review</h3>
+                <form id="reviewForm">
+                    <input type="hidden" id="bookId">
+                    <input type="hidden" id="bookTitle">
+                    <textarea id="reviewText" placeholder="Write your review here..." required></textarea>
+                    <div class="rating-container">
+                        <label>Rating (1-10):</label>
+                        <input type="range" id="rating-slider" name="rating" min="1" max="10" value="5" class="rating-slider">
+                        <span id="rating-value">5</span>/10
+                    </div>
+                    <div class="recommend-container">
+                        <label>Would you recommend this book?</label>
+                        <div class="recommend-options">
+                            <input type="radio" id="recommend-yes" name="recommend" value="yes" required>
+                            <label for="recommend-yes">Yes</label>
+                            <input type="radio" id="recommend-no" name="recommend" value="no">
+                            <label for="recommend-no">No</label>
+                        </div>
+                    </div>
+                    <button type="submit">Submit Review</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Page -->
+    <div id="search-page" style="display: none;">
+        <h2>Book Search</h2>
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="search-page-input" placeholder="Search by title, author, or genre...">
+                <button id="search-page-button"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+        <div id="search-results" class="book-grid">
+            <!-- Search results will appear here -->
+        </div>
+    </div>
+
+    <!-- Admin Controls Page -->
+    <div id="admin-page" style="display: none;">
+        <h2>Admin Controls</h2>
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="users">Manage Users</button>
+            <button class="admin-tab" data-tab="reviews">Manage Reviews</button>
+        </div>
+        
+        <div id="admin-users" class="admin-tab-content">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- User rows will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="admin-reviews" class="admin-tab-content" style="display: none;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Book Title</th>
+                        <th>Rating</th>
+                        <th>Recommended</th>
+                        <th>Review</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="reviews-table-body">
+                    <!-- Review rows will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Unauthorized Access Page -->
+    <div id="unauthorized-page" style="display: none;">
+        <div class="unauthorized-container">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h2>UNAUTHORIZED ACCESS</h2>
+            <p>You do not have permission to view this page.</p>
+            <button id="back-to-home">Back to Home</button>
+        </div>
+    </div>
+</div>

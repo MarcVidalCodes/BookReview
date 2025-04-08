@@ -1,0 +1,107 @@
+<!-- Main Content with Navigation -->
+<div class="main-content">
+    <header>
+        <div class="logo">
+            <i class="fas fa-book-reader"></i> 
+            <h1>BookNerds</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/" id="nav-home">Home</a></li>
+                <li><a href="/my-reviews" id="nav-my-reviews">My Reviews</a></li>
+                <li><a href="/search" id="nav-search" class="active">Search</a></li>
+                <li><a href="/admin" id="nav-admin">Admin</a></li>
+                <li><a href="/logout" id="logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Search Page -->
+    <div id="search-page">
+        <h2>Book Search</h2>
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="search-page-input" placeholder="Search by title, author, or genre...">
+                <button id="search-page-button"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+        <div id="search-results" class="book-grid">
+            <!-- Search results will appear here -->
+        </div>
+    </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script src="/js/books.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Check authentication
+        if (!isUserLoggedIn()) {
+            window.location.href = '/';
+        }
+        
+        // Set up search functionality
+        const searchButton = document.getElementById('search-page-button');
+        const searchInput = document.getElementById('search-page-input');
+        
+        if (searchButton) {
+            searchButton.addEventListener('click', performSearch);
+        }
+        
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+            
+            // Focus on search input when page loads
+            searchInput.focus();
+        }
+        
+        function performSearch() {
+            const query = document.getElementById('search-page-input').value;
+            if (!query) {
+                alert('Please enter a search term');
+                return;
+            }
+            
+            const searchResults = document.getElementById('search-results');
+            searchResults.innerHTML = '<p class="loading">Searching for books...</p>';
+            
+            fetch(`/api/books/search?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(books => {
+                    if (books.length === 0) {
+                        searchResults.innerHTML = '<p class="no-results">No books found. Try a different search term.</p>';
+                        return;
+                    }
+                    
+                    searchResults.innerHTML = books.map(book => `
+                        <div class="book-card" data-id="${book.id}" data-title="${book.title}">
+                            <div class="book-image">
+                                <img src="${book.thumbnail || '/img/default-book.png'}" alt="${book.title}">
+                            </div>
+                            <div class="book-info">
+                                <div class="book-title">${book.title}</div>
+                                <div class="book-author">By ${book.author}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    // Add event listeners to book cards
+                    document.querySelectorAll('.book-card').forEach(card => {
+                        card.addEventListener('click', () => {
+                            const bookId = card.dataset.id;
+                            window.location.href = `/book/${bookId}`;
+                        });
+                    });
+                })
+                .catch(err => {
+                    console.error('Error searching books:', err);
+                    searchResults.innerHTML = '<p class="error">Error searching books. Please try again later.</p>';
+                });
+        }
+    });
+</script>

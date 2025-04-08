@@ -1,0 +1,119 @@
+<div class="book-detail-page">
+    <header>
+        <div class="logo">
+            <i class="fas fa-book-reader"></i> 
+            <h1>BookNerds</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/#/home">Home</a></li>
+                <li><a href="/#/my-reviews">My Reviews</a></li>
+                <li><a href="/#/search">Search</a></li>
+                <li><a href="/#/admin">Admin</a></li>
+                <li><a href="/#/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="book-container">
+        <div class="book-detail-container">
+            <div id="book-info" data-book-id="{{bookId}}">
+                <p class="loading">Loading book details...</p>
+            </div>
+            <div id="book-reviews">
+                <h3>Reviews</h3>
+                <ul id="book-reviews-list">
+                    <p class="loading">Loading reviews...</p>
+                </ul>
+            </div>
+            <div id="add-review">
+                <h3>Add Your Review</h3>
+                <form id="reviewForm">
+                    <input type="hidden" id="bookId" value="{{bookId}}">
+                    <input type="hidden" id="bookTitle">
+                    <textarea id="reviewText" placeholder="Write your review here..." required></textarea>
+                    <div class="rating-container">
+                        <label>Rating (1-10):</label>
+                        <input type="range" id="rating-slider" name="rating" min="1" max="10" value="5" class="rating-slider">
+                        <span id="rating-value">5</span>/10
+                    </div>
+                    <div class="recommend-container">
+                        <label>Would you recommend this book?</label>
+                        <div class="recommend-options">
+                            <input type="radio" id="recommend-yes" name="recommend" value="yes" required>
+                            <label for="recommend-yes">Yes</label>
+                            <input type="radio" id="recommend-no" name="recommend" value="no">
+                            <label for="recommend-no">No</label>
+                        </div>
+                    </div>
+                    <button type="submit">Submit Review</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const bookId = document.querySelector('#book-info').dataset.bookId;
+        
+        // Load book details
+        fetch(`/api/books/${bookId}`)
+            .then(response => response.json())
+            .then(book => {
+                document.getElementById('book-info').innerHTML = `
+                    <img src="${book.thumbnail || '/img/default-book.png'}" alt="${book.title}" class="book-detail-image">
+                    <h2 class="book-detail-title">${book.title}</h2>
+                    <p class="book-detail-author">By ${book.author}</p>
+                    <p class="book-detail-description">${book.description}</p>
+                `;
+                document.getElementById('bookTitle').value = book.title;
+                
+                // Load book reviews
+                loadBookReviews(book.id);
+            })
+            .catch(err => {
+                console.error('Error loading book details:', err);
+                document.getElementById('book-info').innerHTML = '<p class="error">Error loading book details. Please try again later.</p>';
+            });
+            
+        function loadBookReviews(bookId) {
+            fetch(`/api/reviews/book/${encodeURIComponent(bookId)}`)
+                .then(response => response.json())
+                .then(reviews => {
+                    const bookReviewsList = document.getElementById('book-reviews-list');
+                    if (reviews.length === 0) {
+                        bookReviewsList.innerHTML = '<p class="no-results">No reviews yet. Be the first to review!</p>';
+                    } else {
+                        bookReviewsList.innerHTML = reviews.map(review => {
+                            // Show delete button only for admin users
+                            const deleteButton = '';
+                            
+                            const recommendBadge = review.recommended ? 
+                                '<span class="review-recommend">Recommended</span>' :
+                                '<span class="review-recommend not-recommended">Not Recommended</span>';
+                            
+                            return `
+                                <li class="review-item">
+                                    <div class="review-header">
+                                        <span class="review-author">Posted by ${review.username}</span>
+                                        <div class="review-metadata">
+                                            <div class="review-rating">
+                                                <span class="rating-value">${review.rating}/10</span>
+                                            </div>
+                                            ${recommendBadge}
+                                        </div>
+                                    </div>
+                                    <div class="review-content">${review.reviewText}</div>
+                                </li>
+                            `;
+                        }).join('');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error loading book reviews:', err);
+                    document.getElementById('book-reviews-list').innerHTML = '<p class="error">Error loading reviews.</p>';
+                });
+        }
+    });
+</script>

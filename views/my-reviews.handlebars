@@ -1,0 +1,89 @@
+<!-- Main Content with Navigation -->
+<div class="main-content">
+    <header>
+        <div class="logo">
+            <i class="fas fa-book-reader"></i> 
+            <h1>BookNerds</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/" id="nav-home">Home</a></li>
+                <li><a href="/my-reviews" id="nav-my-reviews" class="active">My Reviews</a></li>
+                <li><a href="/search" id="nav-search">Search</a></li>
+                <li><a href="/admin" id="nav-admin">Admin</a></li>
+                <li><a href="/logout" id="logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- My Reviews Page -->
+    <div id="my-reviews-page">
+        <h2>My Reviews</h2>
+        <div id="my-reviews-list">
+            <p id="no-my-reviews-message">Loading your reviews...</p>
+            <!-- User's reviews will appear here -->
+        </div>
+    </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script src="/js/reviews.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Check authentication
+        const currentUser = getCurrentUser();
+        if (!currentUser) {
+            window.location.href = '/';
+            return;
+        }
+        
+        const myReviewsList = document.getElementById('my-reviews-list');
+        myReviewsList.innerHTML = '<p class="loading">Loading your reviews...</p>';
+        
+        fetch(`/api/reviews/user/${currentUser.id}`)
+            .then(response => response.json())
+            .then(reviews => {
+                if (reviews.length === 0) {
+                    myReviewsList.innerHTML = '<p class="no-results">You haven\'t written any reviews yet.</p>';
+                } else {
+                    myReviewsList.innerHTML = reviews.map(review => {
+                        const recommendBadge = review.recommended ? 
+                            '<span class="review-recommend">Recommended</span>' :
+                            '<span class="review-recommend not-recommended">Not Recommended</span>';
+                        
+                        return `
+                            <li class="review-item">
+                                <div class="review-header">
+                                    <div class="review-book-info">
+                                        <span class="review-title">${review.bookTitle}</span>
+                                    </div>
+                                    <div class="review-metadata">
+                                        <div class="review-rating">
+                                            <span class="rating-value">${review.rating}/10</span>
+                                        </div>
+                                        ${recommendBadge}
+                                    </div>
+                                </div>
+                                <div class="review-content">${review.reviewText}</div>
+                                <div class="review-actions">
+                                    <button class="view-book" data-id="${review.bookId}">View Book</button>
+                                </div>
+                            </li>
+                        `;
+                    }).join('');
+                    
+                    // Add event listeners to view book buttons
+                    document.querySelectorAll('.view-book').forEach(button => {
+                        button.addEventListener('click', () => {
+                            const bookId = button.dataset.id;
+                            window.location.href = `/book/${bookId}`;
+                        });
+                    });
+                }
+            })
+            .catch(err => {
+                console.error('Error loading user reviews:', err);
+                myReviewsList.innerHTML = '<p class="error">Error loading reviews.</p>';
+            });
+    });
+</script>
